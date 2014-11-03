@@ -2018,6 +2018,11 @@ public class QuickContactActivity extends ContactsActivity {
         startActivityForResult(getEditContactIntent(), REQUEST_CODE_CONTACT_EDITOR_ACTIVITY);
     }
 
+    private void deleteContact() {
+        final Uri contactUri = mContactData.getLookupUri();
+        ContactDeletionInteraction.start(this, contactUri, /* finishActivityWhenDone =*/ true);
+    }
+
     private void toggleStar(MenuItem starredMenuItem) {
         // Make sure there is a contact
         if (mContactData != null) {
@@ -2236,6 +2241,9 @@ public class QuickContactActivity extends ContactsActivity {
                 editMenuItem.setVisible(false);
             }
 
+            final MenuItem deleteMenuItem = menu.findItem(R.id.menu_delete);
+            deleteMenuItem.setVisible(isContactEditable());
+
             final MenuItem shareMenuItem = menu.findItem(R.id.menu_share);
             shareMenuItem.setVisible(isContactShareable());
 
@@ -2369,6 +2377,9 @@ public class QuickContactActivity extends ContactsActivity {
                 } else if (isContactEditable()) {
                     editContact();
                 }
+                return true;
+            case R.id.menu_delete:
+                deleteContact();
                 return true;
             case R.id.menu_share:
                 shareContact();
