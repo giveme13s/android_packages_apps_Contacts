@@ -23,6 +23,7 @@ import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -52,8 +53,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageButton;
-import android.widget.Toolbar;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.android.contacts.ContactsActivity;
 import com.android.contacts.R;
@@ -1619,7 +1620,12 @@ public class PeopleActivity extends ContactsActivity implements
                 if (extras != null) {
                     intent.putExtras(extras);
                 }
-                startActivity(intent);
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException ex) {
+                    Toast.makeText(PeopleActivity.this, R.string.missing_app,
+                            Toast.LENGTH_SHORT).show();
+                }
                 break;
         default:
             Log.wtf(TAG, "Unexpected onClick event from " + view);
