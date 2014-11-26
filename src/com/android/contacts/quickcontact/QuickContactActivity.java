@@ -2391,7 +2391,9 @@ public class QuickContactActivity extends ContactsActivity {
                 deleteContact();
                 return true;
             case R.id.menu_share:
-                shareContact();
+                if (isContactShareable()) {
+                    shareContact();
+                }
                 return true;
             case R.id.menu_send_via_sms: {
                 if (mContactData == null) {
