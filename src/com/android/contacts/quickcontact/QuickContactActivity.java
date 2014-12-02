@@ -2136,6 +2136,9 @@ public class QuickContactActivity extends ContactsActivity {
     }
 
     private boolean isShortcutCreatable() {
+        if (mContactData == null || mContactData.isUserProfile()) {
+            return false;
+        }
         final Intent createShortcutIntent = new Intent();
         createShortcutIntent.setAction(ACTION_INSTALL_SHORTCUT);
         final List<ResolveInfo> receivers = getPackageManager()
