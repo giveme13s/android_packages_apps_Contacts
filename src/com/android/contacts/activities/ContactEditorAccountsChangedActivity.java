@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.ContactsContract.Intents;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -101,6 +102,35 @@ public class ContactEditorAccountsChangedActivity extends Activity {
                     AccountListFilter.ACCOUNTS_CONTACT_WRITABLE);
             accountListView.setAdapter(mAccountListAdapter);
             accountListView.setOnItemClickListener(mAccountListItemClickListener);
+        } else if (numAccounts == 1) {
+            // If the user has 1 writable account we will just show the user a message with 2
+            // possible action buttons.
+            setContentView(R.layout.contact_editor_accounts_changed_activity_with_text);
+
+            final TextView textView = (TextView) findViewById(R.id.text);
+            final Button leftButton = (Button) findViewById(R.id.left_button);
+            final Button rightButton = (Button) findViewById(R.id.right_button);
+
+            final AccountWithDataSet account = accounts.get(0);
+            textView.setText(getString(R.string.contact_editor_prompt_one_account,
+                    account.name));
+
+            // This button allows the user to add a new account to the device and return to
+            // this app afterwards.
+            leftButton.setText(getString(R.string.add_new_account));
+            leftButton.setSingleLine(true);
+            leftButton.setEllipsize(TextUtils.TruncateAt.END_SMALL);
+            leftButton.setOnClickListener(mAddAccountClickListener);
+
+            // This button allows the user to continue creating the contact in the specified
+            // account.
+            rightButton.setText(getString(android.R.string.ok));
+            rightButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    saveAccountAndReturnResult(account);
+                }
+            });
         } else {
             // If the user has 0 writable accounts, we will just show the user a message with 2
             // possible action buttons.
