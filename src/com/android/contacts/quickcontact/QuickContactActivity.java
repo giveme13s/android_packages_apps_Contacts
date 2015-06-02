@@ -665,10 +665,6 @@ public class QuickContactActivity extends ContactsActivity {
 
         processIntent(getIntent());
 
-        // Show QuickContact in front of soft input
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
-                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-
         setContentView(R.layout.quickcontact_activity);
 
         mMaterialColorMapUtils = new MaterialColorMapUtils(getResources());
