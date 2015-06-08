@@ -838,6 +838,7 @@ public class MultiPickContactActivity extends ListActivity implements
             unregisterReceiver(mBroadcastReceiver);
         }
 
+        mAdapter = null;
         super.onDestroy();
     }
 
@@ -1219,7 +1220,9 @@ public class MultiPickContactActivity extends ListActivity implements
 
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
-            mAdapter.changeCursor(cursor);
+            if (mAdapter != null) {
+                mAdapter.changeCursor(cursor);
+            }
             if (cursor == null || cursor.getCount() == 0) {
                 if (isPickCall()) {
                     log("no call found");
