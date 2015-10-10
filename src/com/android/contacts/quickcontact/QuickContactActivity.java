@@ -75,11 +75,13 @@ import android.provider.ContactsContract.DataUsageFeedback;
 import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsContract.RawContacts;
+import android.provider.Telephony;
 import android.support.v7.graphics.Palette;
 import android.telecom.PhoneAccount;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.text.BidiFormatter;
+import android.text.SpannableString;
 import android.text.TextDirectionHeuristics;
 import android.text.TextUtils;
 import android.telephony.TelephonyManager;
@@ -123,6 +125,7 @@ import com.android.contacts.common.model.dataitem.DataItem;
 import com.android.contacts.common.model.dataitem.DataKind;
 import com.android.contacts.common.model.dataitem.EmailDataItem;
 import com.android.contacts.common.model.dataitem.EventDataItem;
+import com.android.contacts.common.model.dataitem.GroupMembershipDataItem;
 import com.android.contacts.common.model.dataitem.ImDataItem;
 import com.android.contacts.common.model.dataitem.NicknameDataItem;
 import com.android.contacts.common.model.dataitem.NoteDataItem;
@@ -1012,7 +1015,7 @@ public class QuickContactActivity extends ContactsActivity {
             // the name mimetype.
             final List<Entry> aboutEntries = dataItemsToEntries(mimeTypeItems,
                     /* aboutCardTitleOut = */ null);
-            if (aboutEntries.size() > 0) {
+            if (aboutEntries != null && aboutEntries.size() > 0) {
                 aboutCardEntries.add(aboutEntries);
             }
         }
@@ -1290,9 +1293,11 @@ public class QuickContactActivity extends ContactsActivity {
      * additional dependencies on unsafe things (like the Activity).
      *
      * @param dataItem The {@link DataItem} to convert.
+     * @param secondDataItem A second {@link DataItem} to help build a full entry for some
+     *  mimetypes
      * @return The {@link ExpandingEntryCardView.Entry}, or null if no visual elements are present.
      */
-    private static Entry dataItemToEntry(DataItem dataItem,
+    private static Entry dataItemToEntry(DataItem dataItem, DataItem secondDataItem,
             Context context, Contact contactData,
             final MutableString aboutCardName) {
         Drawable icon = null;
@@ -1626,12 +1631,53 @@ public class QuickContactActivity extends ContactsActivity {
             MutableString aboutCardTitleOut) {
         final List<Entry> entries = new ArrayList<>();
         for (DataItem dataItem : dataItems) {
-            final Entry entry = dataItemToEntry(dataItem, this, mContactData, aboutCardTitleOut);
+                final Entry entry = dataItemToEntry(dataItem, /* secondDataItem = */ null,
+                        this, mContactData, aboutCardTitleOut);
             if (entry != null) {
                 entries.add(entry);
             }
         }
         return entries;
+    }
+
+    private Entry groupDataItemsToEntry(List<DataItem> dataItems) {
+        final List<String> titles = new ArrayList<>();
+        for (DataItem dataItem : dataItems) {
+            if (!(dataItem instanceof GroupMembershipDataItem)) {
+                continue;
+            }
+
+            final GroupMembershipDataItem groupItem = (GroupMembershipDataItem) dataItem;
+            if (groupItem.isDefaultGroup() || groupItem.isFavoritesGroup()) {
+                continue;
+            }
+            final String title = groupItem.getGroupTitle();
+            if (title != null) {
+                titles.add(title);
+            }
+        }
+        if (titles.isEmpty()) {
+            return null;
+        }
+
+        return new Entry(/* viewId = */ -1, /* icon = */ null,
+                /* header */ getResources().getString(R.string.contacts_groups_label),
+                /* subHeader */ null,
+                /* subHeaderIcon = */ null,
+                /* text = */ TextUtils.join(", ", titles),
+                /* textIcon = */ null,
+                /* primaryContentDescription = */ null,
+                /* intent = */ null,
+                /* alternateIcon = */ null,
+                /* alternateIntent = */ null,
+                /* alternateContentDescription = */ null,
+                /* shouldApplyColor = */ true,
+                /* isEditable = */ false,
+                /* EntryContextMenuInfo = */ null,
+                /* thirdIcon = */ null,
+                /* thirdIntent = */ null,
+                /* thirdContentDescription = */ null,
+                /* iconResourceId = */ 0);
     }
 
     private static String getIntentResolveLabel(Intent intent, Context context) {
